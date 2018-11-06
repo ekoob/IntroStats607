@@ -287,7 +287,7 @@ summary(quail_glm)
 #likelihood CIs
 confint(quail_glm)
 
-#plot with line
+#plot with li ne
 quail_plot + 
   geom_point() + 
   stat_smooth(method = "glm", 
