@@ -1,0 +1,398 @@
+---
+title: "Midterm_Koob_Elise_2018"
+author: "Elise Koob"
+date: "November 9, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Midterm Exam
+
+### 1) Sampling your system (10 points)
+#### **Each of you has a study system you work in and a question of interest. Give an example of one variable that you would sample in order to get a sense of its variation in nature. Describe, in detail, how you would sample for the population of that variable in order to understand its distribution.** 
+
+My research focuses on black sea bass, a demersal marine fish becoming increasingly more common in Massachusetts waters. One variable of interest that is measured for all commercially and recreationally harvested species is a length distribution of the population. When paired with an age-length key, many important population parameters can be estimated from this information, including growth rates, age/size at maturity, longevity, etc. (Campana, 2001). These parameters are used in stock assessments that help manage fisheries. Therefore, the length distribution of a population can be extremely important information.
+
+Black sea bass have expanded their population distribution farther north than historically reported, increasing in numbers throughout Massachusetts (NEFSC, 2017). Recent inquiries have arisen about spawning activity and distribution north of Cape Cod (McBride et al, 2018), where there have been no reported occurrences. The following sampling design is based on if a study were conducted to collect information on the length distribution of spawning adult black sea bass in Massachusetts waters north of Cape Cod. The Massachusetts Division of Marine Fisheries Resource Assessment Trawl Survey is limited by bottom type, therefore, a study such as this may need to be implemented to address this question. 
+
+
+#### **Just what is your sample versus your population?** 
+
+The sample would be the fish captured for which data was collected whereas the population would be all spawning black sea bass in Massachusetts waters north of Cape Cod.
+
+#### **What would your sampling design be? Why would you design it that particular way?** 
+
+I would conduct a rod and reel survey to capture black sea bass during the spawning season. This type of survey design would allow for sites to be selected on a variety of bottom types, expanding the area in which data can be collected than what is available from the Trawl Survey. Black sea bass tend to congregate around rock piles and wrecks, which cannot be surveyed using a trawl net. Sites throughout Cape Cod Bay, Massachusetts Bay and along the North Shore would be chosen and sorted based on bottom type and depth. This would reduce the amount of bias created if only sampling one type for each. Sampling of 30 randomized sites would occur once a month (new set of randomized sites each month) beginning in June and ending in September, the duration of black sea bass spawning at the northern edge of their range. Randomization is important so that no bias is instilled on the selection of sampling areas. Additionally, I believe 30 sites would be a reasonable number that would keep costs as low as possible while still allowing for adequate sampling of the area north of Cape Cod. Four anglers would fish with a rod and reel at each site for 1 hour with the same gear and bait as it would be important to keep fishing effort consistent among all sites throughout the study.
+
+Specimens successfully brought onboard would be measured, scale sample taken (for age determinations) and gently squeezed for sex and maturity determinations. [Mature, spawning condition fish (usually classified as 'ripe' or 'ripe and running') will release eggs or sperm when the abdomen is pushed lightly.]
+
+#### **What are potential confounding influences of both sampling technique and sample design that you need to be careful to avoid?** 
+
+Black sea bass are noted as opportunistic feeders (Kendall, 1977) but if there was a preference then catch may be impacted. However, since the bait will be kept consistent throughout the study, this impact should be consistent across all sites and not create a bias in the study. This study is also dependent on black sea bass actively feeding during spawning season. I am unaware of any studies looking at the feeding behavior of black sea bass during spawning season but any decrease in appetite would also impact catch rate. However, again, this should be consistent across sites and the study and not create a bias in data collected.
+
+Angler experience has the potential to cause bias in the study. Due to this, a mix of experience levels should be used in each trip as more experienced fishers are likely to have a higher catch rate than more inexperienced anglers. Surveys can be completed to assess fishing experience prior to fishing trips. 
+Sampling trips within each month should occur around the same time every month and avoid uneven temporal spacing of sampling. For example, sampling at the end of June, then immediately at the beginning of July and then waiting until late August. 
+
+Overall, consistency in sampling technique and design between sites and across the entire study should be a priority.
+
+#### **What statistical distribution might the variable take, and why?** 
+
+Black sea bass length distribution would likely a normally distributed frequency (bell curve). This is due to high mortality in younger and older fish in a population and therefore a peak in the mid-range of lengths/ages. 
+
+
+##### **Works Cited**  
+> ###### Campana, S. E. (2001). Accuracy, precision and quality control in age determination, including a review of the use and abuse of age validation methods. Journal of Fish Biology, 59, 197-242. 
+> ###### Kendall, A. W. (1977). Biological and Fisheries Data on Black Sea Bass, Centropristis striata (Linnaeus). Highlands, NJ.
+> ###### McBride, RS, MK Tweedie, and K Oliveira. 2018. Reproduction, first-year growth, and expansion of spawning and nursery grounds of black sea bass (Centropristis striata) into a warming Gulf of Maine. Fishery Bulletin 116: 323-336.
+> ###### NEFSC. (2017). 62nd Northeast Regional Stock Assessment Workshop. Assessment Summary Report 17-01.    
+
+
+###2) Let's get philosophical. (10 points) 
+#### Are you a frequentist, likelihoodist, or Bayesian? Why? Include in your answer why you prefer the inferential tools (e.g. confidence intervals, test statistics, posterior probabilities, etc.) of your chosen worldview and why you do not like the ones of the other one. This includes defining just what those different tools mean! 
+
+#### Extra credit for citing and discussing outside sources - one point per source/point
+
+A frequentist approach to statistics involves testing data collected from an experiment or observational study to a specific null hypothesis. This testing will lead to either rejecting or not rejecting the null hypothesis in favor of an alternate hypothesis. Mayo & Cox (2006) discusses theory behind frequentist inference as that it is based on repeated experiments, i.e. an acquired result one would get if the experiment or study were repeated an infinite number of times. This approach uses test statistics to examine the conformity of the study data to the null hypothesis, followed by p-values to give the probability of getting that result, or a result more extreme, when the null hypothesis is true. A significance level is applied (often 0.05 or 0.01) for the p-value as threshold, below which the null hypothesis would be rejected and the data regarded as 'statistically significant'. Confidence intervals are also used (usually 95% confidence intervals) to give a range of values in which one can be 95% confident the true value of that parameter lies within.
+
+One of the biggest debates surrounding frequentist inference is the use of p-values as the threshold for rejecting null hypotheses(Mayo & Cox, 2006). It is up to the researcher to set the alpha value for the p-value which adds subjectivity to a process that should be objective. Additionally, many times the p-value is misinterpreted by relating statistical significance to study result significance. The American Statistical Association discusses this issue in full, clarifying that a smaller p-value does not equate to a 'more significant' finding (Wasserstein & Lazar, 2016). 
+
+Overall, frequentist inference seems to be the most wide-spread statistical analysis used thus far but is also surrounded by debate regarding p-values and the underlying theory of testing data given a specific hypothesis (p(D|H)). The latter seems very unintuitive to me. Additionally, it seems bizarre and backwards that we would test a null hypothesis with the goal of rejecting it in order to support our actual hypothesis versus being able to test our actual hypothesis in the first place. Due to these reasons, I do not believe that I am a frequentist when it comes to data analysis. 
+
+Likelihood inference is based off of frequentist inference and uses model comparisons to identify how well data supports a hypothesis. The Likelihood Function (often the Log Likelihood Function) and Maximum Log Likelihood are used to find values for model parameters that have the highest likelihood given a specific dataset. Confidence intervals are used (like in frequentist inference) to define the range of values in which there is 95% confidence the true value lies within. Again, this method of analysis is testing how well the data collected fits a certain hypothesis and not the other way around. 
+
+Upon further reading, the Law of Likelihood uses a likelihood ratio to compare one hypothesis to another and the hypothesis with the higher likelihood is supported. Blume (2002) discusses one advantage of this method as not being sensitive to the same things as p-values are (such as the number of examinations). However, overall this method still seems problematic to me (if used exclusively) given that one would have to compare every possible hypothesis in order to arrive at one 'true' hypothesis. It seems improbable, or even impossible, that one could consider every hypothesis. It is for these reasons that I may not be a likelihoodist in full. 
+
+Bayesian inference incorporates likelihood as part of a larger equation that uses prior knowledge to inform the model being used and give a probability distribution of values. This method uses Bayes' Theorem of probability to assign a degree of belief to parameter values. A posterior density distribution results from multiplying a prior probability by a likelihood function and normalizing by the marginal likelihood (Brewer, 2012). Additionally, credible intervals are calculated to show where 95% of the probability mass from the posterior distribution is located. This, unlike confidence intervals, gives a range of probabilities where a parameter is located within a region.
+
+The largest difference between Bayesian and Likelihood and Frequentist approaches is the incorporation of prior knowledge about the system in question from previous studies or basic understanding. Bernardo (2003) describes this as a major advantage to Bayesian Inference along with being amendable to complex analyses. In addition, it allows for comparison of hypotheses by looking at probability. Unlike the two other methods, Bayesian inference evaluates a hypothesis based on the data which seems to me the more logical progression of data analysis. Although incorporation of priors is debated, I think that it is beneficial to include them. If no previous studies have been done in which to draw parameter values for the prior, then a flat prior can be used (Bernardo, 2003).
+
+From what I know thus far about these three inferential techniques, I think that I am the most Bayesian out of them. It seems as though including prior information about the system you are working with would be the most intuitive way to complete data analysis and receive informed results. Additionally, it is the method in which we are able to test a hypothesis based on the data collected (p(H|D)) and not vice versa. 
+
+##### **Works Cited**  
+> ###### Bernardo, J. M. (2003). Bayesian statistics. In Probability and Statistics (Vol. R. Viertl, pp. 1-46). Oxford, UK: UNESCO,: Encyclopedia of Life Support Systems (EOLSS).
+> ###### Blume, J. D. (2002). Likelihood methods for measuring statistical evidence. Statistics in Medicine, 21, 2563-2599. 
+> ###### Brewer, B. J. (2012). Introduction to Bayesian Statistics. Creative Commons Attribution-ShareAlike 3.0.  1-97.
+> ###### Mayo, D. G., & Cox, D. R. (2006). Frequentist statistics as a theory of inductive inference. In IMS Lecture Notes-Monograph Series 2nd Lehmann Symposium - Optimality (Vol. 49, pp. 77-97). Institute of Mathematical Statistics.
+> ###### Wasserstein, R. L., & Lazar, N. A. (2016). The ASA's Statement on p-Values: Context , Process , and Purpose. The American Statistician, 70(2), 129-133. 
+
+
+### 3) Power (20 points) 
+
+```{r, warning = FALSE, message = FALSE}
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(tidyr)
+library(broom)
+library(MASS)
+library(profileModel)
+library(brms)
+library(bayesplot)
+library(tidybayes)
+library(rstanarm)
+```
+
+#### We have a lot of aspects of the sample of data that we collect which can alter the power of our linear regressions. 
+#### 1. Slope 
+#### 2. Intercept 
+#### 3. Residual variance 
+#### 4. Sample Size 
+#### 5. Range of X values
+
+####Choose three of the above properties and demonstrate how they alter power of an F-test from a linear regression using at least three different alpha levels. As a baseline of the parameters, let's use the information from the seal data: slope = 0.00237, intercept=115.767, sigma = 5.6805, range of seal ages = 958 to 8353, or, if you prefer, seal ages  N(3730.246, 1293.485). Your call what distribution to use for seal age simulation. 
+
+slope, intercept, sample size
+three alpha levels
+baseline parameters:
+
+```{r}
+
+# 4. Sample Size
+
+
+#linear model(lm())
+#F-test = anova(of linearmodel)
+
+#Power:
+#You know that for any set of parameters you are monkeying with, you'll need to: 1. Simulate a data set with those parameters. 2. Fit a model to that simulated dataset and extract a p-value. 3. Execute steps 1-2 some number of times. 4. From those p-values, calculate power (1 - proportion of wrong p-values at a prespecified ).
+
+
+```
+
+```{r, eval = FALSE}
+crossing multiple parameter units
+
+Crossing in beginning
+
+dataframe
+Slope	intercept	sigma		power
+
+
+Use filter to look at effects subset: where slope varied but where intercept and sigma equal the same values
+i.e.
+
+slope	intercept	sigma
+1        	1	     	1
+2       	1	    	1
+3         1       1
+OR use ggplot to play with facetwrap() or colors
+
+Do all at once (i.e. vary the 3 parameters) then break it up/look at it
+
+```
+
+#### Extra credit 1 - test whether the distribution of ages alters power: 3 points 
+
+####Extra Credit 2 Choose just one of the above elements to vary. Using likelihood to fit models, repeat your power analysis for a chi-square likelihood ratio test. You can use glm() , bbmle or some other means of fitting and obtaining a LRT at your discretion. 5 points. 
+
+
+
+
+###4) Bayes Theorem 
+#### I've referenced the following figure a few times. I'd like you to demonstrate your understanding of Bayes Theorem by hand showing what the probability of the sun exploding is given the data. Assume that your prior probability that the sun explodes is p(Sun Explodes) = 0.0001. The rest of the information you need is in the cartoon!
+
+The probability sun exploding given data is 0.00348814.
+
+```{r}
+#Bayes:
+#p(H|D) = (p(D|H)*p(H))/p(D)
+  #p(D) = (p(D|H1)*p(H1)) + (p(D|H2)*p(H2))
+          #probability of truth*probability of nova +
+          #probability of lie*probability of no nova
+
+#p_HD = probability sun exploding given data 
+  
+p_DH <- 35/36 #probability truth about nova 
+p_DH2 <- 1/36 #probability lie about nova
+p_H <- 0.0001 #probability of nova
+p_H2 <- 1-0.0001 #probability of no nova
+
+p_HD <- (p_DH*p_H)/((p_DH*p_H) + (p_DH2*p_H2))
+p_HD
+
+```
+
+
+### 5) Quailing at the Prospect of Linear Models 
+#### I'd like us to walk through the three different 'engines' that we have learned about to fit linear models. To motivate this, we'll look at Burness et al.'s 2012 study "Post-hatch heat warms adult beaks: irreversible physiological plasticity in Japanese quail. We'll be looking at the morphology data. 
+
+###5.1 Three fits (10 points)
+#### To begin with, I'd like you to fit the relationship that describes how Tarsus (leg) length predicts upper beak (Culmen) length. Fit this relationship using least squares, likelihood, and Bayesian techniques. For each fit, demonstrate that the necessary assumptions have been met. Note, functions used to fit with likelihood and Bayes may or may not behave well when fed NAs. So look out for those errors. 
+
+```{r, message = FALSE, warning = FALSE}
+
+#load data
+quail <- read.csv("../Data/Morphology data.csv")
+str(quail)
+
+#initial visualization
+quail_plot <- ggplot(data=quail, aes(x=Tarsus..mm., y=Culmen..mm.)) + 
+  geom_point()
+quail_plot
+
+
+#model with least squares
+quail_mod <- lm(Culmen..mm. ~ Tarsus..mm., data=quail)
+
+#test least squares assumptions
+plot(quail_mod, which=1) #no relationship between fitted and residuals
+plot(quail_mod, which=2) #something a little funky at ends
+
+hist(residuals(quail_mod)) #normally distributed
+
+
+#model with likelihood
+#glm
+quail_glm <- glm(Culmen..mm. ~ Tarsus..mm., 
+                family = gaussian(link = "identity"), 
+                data = quail)
+
+#test likelihood assumptions
+fitted <- predict(quail_glm) 
+res <- residuals(quail_glm) 
+ 
+qplot(fitted, res) #no relationship between fitted and residuals
+
+qqnorm(res) 
+qqline(res) #again, a little something weird at the ends
+
+hist(res) #normally distributed
+
+
+#model with Bayes
+quail_bayes <- brm(Culmen..mm. ~ Tarsus..mm.,
+                     family = gaussian(link = "identity"),
+                     data = quail,
+                     file = "./quail_bayes.brms") 
+
+
+#test Bayes assumptions
+plot(quail_bayes) #posterior distributions normally distributed & chains converged
+
+#rhat
+mcmc_rhat(rhat(quail_bayes)) #shows how well chains have converged: all close to 1, meaning they are the same
+
+#autocorrelation
+mcmc_acf(as.data.frame(quail_bayes)) #drop off quickly, good
+
+#predicted vs residuals
+quail_bayes_fit <- predict(quail_bayes) %>% as_tibble
+quail_bayes_res <- residuals(quail_bayes)%>% as_tibble
+
+qplot(quail_bayes_res$Estimate, quail_bayes_fit$Estimate) #no relationship
+
+```
+
+### 5.2 Three interpretations (10 points) 
+#### OK, now that we have fits, take a look! Do the coefficients and their associated measures of error in their estimation match? How would we interpret the results from these different analyses differently? Or would we? Note, confint works on lm objects as well. 
+
+*******************************************
+describe any differences in fits and if we should analyze differently
+
+#######The relationship from the three different analyses describes how Tarsus (leg) length predicts upper beak (Culmen) length. Although, we are trying to describe the same relationship we did so in three very different ways. 
+
+In our least squares method we took a frequentist approach where we had the goal of describing the probability of obtaining the Tarsus predicating beak size relationship. In this mindset we used our test statistics (Tarsus estimate = 0.37292677, p value = 3.23x10-273) to reject the null hypothesis. This would be interpreted as a fixed value and only Tarsus lengths at that size predicts the Culmen length.  
+
+In our second approach to describing this relationship we took a likelihoodist approach, in which, we looked at the probability of obtaining this relationship given our hypothesis. In this case we would use the generated test statistics similarly, to our first approach to look at the relationship, but this approach also allows us to evaluate the weight of evidence for different hypotheses and not just in rejection of our null. This likelihoodist framework allows for a little bit more freedom in our predictions and probabilities because of the model type framework we worked in. This allows for our description of our relationship to not be fixed upon one prediction.  
+
+Our Bayesian approach allows us to look at our relationship differently in that now we can assert probabilities to our relationship and it is not a fixed value of how the world of this bird morphology relationship works. In that Culmen length only predicts Tarsus given a specific length. In our Bayesian framework we now have the power, using the knowledge of how the world bird morphology works, that given a specific Culmen length we can give a specific probability with varying levels of freedom that the Tarsus length will be X.  
+################
+*************************************************
+
+```{r, message = FALSE, warning = FALSE}
+#least squares fit
+
+#f-tests of model
+tidy(anova(quail_mod))
+
+#t-tests of parameters
+tidy(summary(quail_mod))
+
+#CIs
+confint(quail_mod)
+
+#plot with line
+quail_plot + 
+  stat_smooth(method=lm, formula=y~x,
+              color = "red") 
+
+#***************************************************may need to do a different likelihood
+#likelihood fit
+#coefficients
+summary(quail_glm)
+
+#likelihood CIs
+confint(quail_glm)
+
+#plot with line
+quail_plot + 
+  geom_point() + 
+  stat_smooth(method = "glm", 
+              method.args = list(family = gaussian(link="identity")),
+              color = "red")
+
+
+
+
+
+#bayesian fit
+pp_check(quail_bayes, type="scatter") #looks like close to 1:1 fit
+
+#normality
+qqnorm(quail_bayes_fit$Estimate)
+qqline(quail_bayes_res$Estimate) #weird
+pp_check(quail_bayes, type="error_hist") #normally distributed
+
+##match to posterior
+pp_check(quail_bayes, type="stat_2d") #good scatter
+pp_check(quail_bayes, nsamples = 100) #bimodal that isn't being picked up super well...
+
+#coefficients
+summary(quail_bayes, digits=5)
+
+#confidence intervals
+posterior_interval(quail_bayes)
+
+#visualize
+quail_chains <- as.data.frame(quail_bayes)
+
+quail_plot +
+  geom_abline(intercept=quail_chains[,1], slope = quail_chains[,2], alpha=0.1, color="lightgrey") +
+  geom_abline(intercept=fixef(quail_bayes)[1], slope = fixef(quail_bayes)[2], color="red") +
+  geom_point()
+
+```
+
+
+### 5.3 Everyday I'm Profilin' (10 points) 
+#### For your likelihood fit, are your profiles well behaved? For just the slope, use grid sampling to create a profile. You'll need to write functions for this, and use the results from your glm() fit to provide the reasonable bounds of what you should be profiling over (3SE should do). Is it well behaved? Plot the profile and give the 80% and 95% CI. Verify your results with profileModel . 
+
+```{r, eval = FALSE}
+#likelihood function
+
+likelihood_fun <- function(slope, intercept, resid_sd){
+  #data generating process
+  culmen_fit <- intercept + slope * quail$Tarsus..mm.
+  
+  #likelihood
+  sum(dnorm(quail$Culmen..mm., culmen_fit, resid_sd, log=TRUE))
+}
+
+#eyeball parameters
+summary(quail_glm)
+
+#grid sampling
+grid_samp <- crossing(intercept = -0.10),
+                      slope = seq(0.25,0.45,.05),
+                      resid_sd = _______) %>%
+  rowwise() %>%
+  mutate(loglike = likelihood_fun(slope, intercept, resid_sd)) %>%
+  ungroup()
+
+#the ML estimates are
+grid_samp %>% filter(loglike == max(loglike))
+
+
+#profiles
+plot(profile(quail_glm))
+
+
+#CIs
+confint(quail_glm)
+
+
+
+#profileModel
+prof <- profileModel(quail_glm, 
+                     objective = "ordinaryDeviance")
+plot(prof, print.grid.points = TRUE)
+
+
+#with CIs?
+prof <- profileModel(quail_glm,
+                     objective = "ordinaryDeviance", 
+                     quantile = qchisq(0.80, 0.95))
+plot(prof, print.grid.points = TRUE)
+
+```
+
+
+### 5.4 The Power of the Prior (10 points) 
+#### This data set is pretty big. After excluding NAs in the variables we're interested in, it's over 766 lines of data! Now, a lot of data can overhwelm a strong prior. But only to a point. Show first that there is enough data here that a prior for the slope with an estimate of 0.4 and a sd of 0.01 is overwhelmed by the data by demonstrating that it produces similar results to our already fit flat prior. Second, see if a very small sample size (n = 10) would at least include 0.4 in it's 95% Credible Interval. Last, demonstrate at what sample size that 95% CL first begins to include 0.4 when we have a strong prior. How much data do we really need to overcome our prior belief? Note, it takes a long time to fit these models, so, try a strategy of spacing out the 3-4 sample sizes, and then zoom in on an interesting region. 
+
+
+
+
+
+### 6. Extra Credit Make an election forecast
+#### 1 point for the correct winner. 5 points for correctly predicting the popular vote and being within 10% (3% just for trying!). 5 points for predicting the electoral college and geting no more than 5 states wrong (3 points just for trying). 5 points for predicting the senate races getting no more than 5 states wrong (3 points just for trying). 1 extra point for each vote percentage within your 80% Confidence/Credible Interval. Ditto for the house races
+
+```{r}
+
+
+
+```
+
