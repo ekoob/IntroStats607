@@ -107,7 +107,7 @@ library(beyonce)
 ####Choose three of the above properties and demonstrate how they alter power of an F-test from a linear regression using at least three different alpha levels. As a baseline of the parameters, let's use the information from the seal data: slope = 0.00237, intercept=115.767, sigma = 5.6805, range of seal ages = 958 to 8353, or, if you prefer, seal ages  N(3730.246, 1293.485). Your call what distribution to use for seal age simulation. 
 
 
-```{r, message=FALSE}
+```{r, message=FALSE, warning = FALSE}
 #Choosing to vary intercept, resid and sample size
 
 seal_df <- data.frame(slope = 0.00237) %>%
@@ -175,9 +175,10 @@ ggplot(power_int, aes(x = intercept, y = power, color = factor(alpha))) +
   scale_color_manual(values = beyonce_palette(129))
 
 #just trying another visualization...
-ggplot(power_int, aes(x = intercept, y = power, , color = factor(alpha))) +
+ggplot(power_int, aes(x = intercept, y = power, color = factor(alpha))) +
   geom_point(size = 3) +
   geom_line(size = 1.5) +
+  theme_bw() +
   facet_wrap(~alpha)
 
 #INTERCEPT NOT MUCH OF AN EFFECT ON POWER
@@ -213,9 +214,10 @@ ggplot(power_samp_size, aes(x = samp_size, y = power, color = factor(alpha))) +
   theme_bw() +
   scale_color_brewer(palette = "PuRd")
 
-#LARGE EFFECT ON POWER (increasing sample size increases power; also looks like it has a larger effect on the smallest alpha level (steeper slope for 0.01 than for 0.05 and 0.10))
+#LARGE EFFECT ON POWER-increasing sample size increases power; also looks like it has a larger effect on the smallest alpha level (steeper slope for 0.01 than for 0.05 and 0.10)
 
 ```
+
 
 ###4) Bayes Theorem 
 #### I've referenced the following figure a few times. I'd like you to demonstrate your understanding of Bayes Theorem by hand showing what the probability of the sun exploding is given the data. Assume that your prior probability that the sun explodes is p(Sun Explodes) = 0.0001. The rest of the information you need is in the cartoon!
@@ -293,7 +295,7 @@ hist(res) #normally distributed
 quail_bayes <- brm(Culmen..mm. ~ Tarsus..mm.,
                      family = gaussian(link = "identity"),
                      data = quail,
-                     file = "./quail_bayes.brms") 
+                     file = "quail_bayes.brms") 
 
 
 #test Bayes assumptions
@@ -359,7 +361,7 @@ pp_check(quail_bayes, type="scatter") #looks like close to 1:1 fit
 
 #normality
 qqnorm(quail_bayes_fit$Estimate)
-qqline(quail_bayes_res$Estimate) #weird
+qqline(quail_bayes_res$Estimate) # a littl weird
 pp_check(quail_bayes, type="error_hist") #normally distributed
 
 ##match to posterior
@@ -513,7 +515,7 @@ quail_int_profile %>%
 colnames(quail_slope_profile)
 
 
-#plotted it with a line through 0.37 since I couldn't get the CI's for somet reason
+#plotted it with a line through 0.37 since I couldn't get the CI's for some reason
 ggplot(quail_slope_profile, aes(x = slope, y = loglike)) +
   geom_line() +
   geom_vline(xintercept=0.37, lty=2)
@@ -549,7 +551,7 @@ plot(prof2, print.grid.points = TRUE)
 
 #### Show first that there is enough data here that a prior for the slope with an estimate of 0.4 and a sd of 0.01 is overwhelmed by the data by demonstrating that it produces similar results to our already fit flat prior. 
 
-```{r}
+```{r, warning = FALSE}
 #current prior
 prior_summary(quail_bayes)
 
@@ -636,8 +638,8 @@ quail_plot +
 #### Last, demonstrate at what sample size that 95% CL first begins to include 0.4 when we have a strong prior. How much data do we really need to overcome our prior belief? Note, it takes a long time to fit these models, so, try a strategy of spacing out the 3-4 sample sizes, and then zoom in on an interesting region. 
 
 ```{r}
-#sample size of 10 with prior = 0.4 INCLUDES 0.4
-#sample size of 766 with prior = 0.4 DOES NOT include 0.4
+#sample size of 10 with prior = 0.4; INCLUDES 0.4
+#sample size of 766 with prior = 0.4; DOES NOT include 0.4
 #what sample size do we start to see 0.4 included?
 
 #random sample of quail (n = 200)
@@ -681,7 +683,7 @@ quail_bayes_sub_500 <- brm(Culmen..mm. ~ Tarsus..mm.,
                            prior = prior(normal(0.4, 0.01), class = b),
                            file = "quail_bayes_sub_500.Rds")
 
-##Not included in CI
+##0.4 NOT included in CI
 plot(quail_bayes_sub_500, par = "b_Tarsus..mm.")
 posterior_summary(quail_bayes_sub_500)
 
@@ -759,22 +761,21 @@ polls <- polls %>%
 
 colnames(polls)
 
-#plot densities
+#plot densities; normal
 ggplot(polls, aes(x = Democrat, y = Dem_pdf)) +
   geom_line()
-#normal
 
+#normal
 ggplot(polls, aes(x = Republican, y = Rep_pdf)) +
   geom_line()
-#normal
 
+#little funky (lack of data?); looks like gamma distribution
 ggplot(polls, aes(x = Other, y = Other_pdf)) +
   geom_line()
-#little funky (lack of data?); gamma distribution
 
+#normal
 ggplot(polls, aes(x = Undecided, y = Undec_pdf)) +
   geom_line()
-#normal
 
 
 #CIs
@@ -795,7 +796,7 @@ Rep_CI_low; Rep_CI_high
 
 
 #write.csv(polls,'polls.csv')
-#having trouble manipulating dataframe into usable columns for plotting variables together
+#having trouble manipulating dataframe into usable columns for plotting variables
 #made my own spreadsheet to use for plots
 
 polls_2 <- read.csv("polls_tweaked.csv")
