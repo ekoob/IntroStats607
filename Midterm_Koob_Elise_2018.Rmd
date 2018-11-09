@@ -67,7 +67,7 @@ Upon further reading, the Law of Likelihood uses a likelihood ratio to compare o
 
 Bayesian inference incorporates likelihood as part of a larger equation that uses prior knowledge to inform the model being used and give a probability distribution of values. This method uses Bayes' Theorem of probability to assign a degree of belief to parameter values. A posterior density distribution results from multiplying a prior probability by a likelihood function and normalizing by the marginal likelihood (Brewer, 2012). Additionally, credible intervals are calculated to show where 95% of the probability mass from the posterior distribution is located. This, unlike confidence intervals, gives a range of probabilities where a parameter is located within a region.
 
-The largest difference between Bayesian and Likelihood and Frequentist approaches is the incorporation of prior knowledge about the system in question from previous studies or basic understanding. Bernardo (2003) describes this as a major advantage to Bayesian Inference along with being amendable to complex analyses. In addition, it allows for comparison of hypotheses by looking at probability. Unlike the two other methods, Bayesian inference evaluates a hypothesis based on the data which seems to me the more logical progression of data analysis. Although incorporation of priors is debated, I think that it is beneficial to include them. If no previous studies have been done in which to draw parameter values for the prior, then a flat prior can be used (Bernardo, 2003).
+The largest difference between Bayesian and Likelihood/Frequentist approaches is the incorporation of prior knowledge about the system in question from previous studies or basic understanding. Bernardo (2003) describes this as a major advantage to Bayesian Inference along with being amendable to complex analyses. In addition, it allows for comparison of hypotheses by looking at probability. Unlike the two other methods, Bayesian inference evaluates a hypothesis based on the data which seems to me the more logical progression of data analysis. Although incorporation of priors is debated, I think that it is beneficial to include them. If no previous studies have been done in which to draw parameter values for the prior, then a flat prior can be used (Bernardo, 2003).
 
 From what I know thus far about these three inferential techniques, I think that I am the most Bayesian out of them. It seems as though including prior information about the system you are working with would be the most intuitive way to complete data analysis and receive informed results. Additionally, it is the method in which we are able to test a hypothesis based on the data collected (p(H|D)) and not vice versa. 
 
@@ -93,6 +93,8 @@ library(brms)
 library(bayesplot)
 library(tidybayes)
 library(rstanarm)
+library(purrr)
+library(beyonce)
 ```
 
 #### We have a lot of aspects of the sample of data that we collect which can alter the power of our linear regressions. 
@@ -104,52 +106,116 @@ library(rstanarm)
 
 ####Choose three of the above properties and demonstrate how they alter power of an F-test from a linear regression using at least three different alpha levels. As a baseline of the parameters, let's use the information from the seal data: slope = 0.00237, intercept=115.767, sigma = 5.6805, range of seal ages = 958 to 8353, or, if you prefer, seal ages  N(3730.246, 1293.485). Your call what distribution to use for seal age simulation. 
 
-slope, intercept, sample size
-three alpha levels
-baseline parameters:
+
+```{r, message=FALSE}
+#Choosing to vary intercept, resid and sample size
+
+seal_df <- data.frame(slope = 0.00237) %>%
+  crossing(intercept = c(110, 115, 120)) %>%
+  crossing(resid = c(3,4,5,6,7)) %>%
+  crossing(samp_size = c(5:15))
+
+#replicate and add 100 simulations
+seal_df <- seal_df %>%
+  group_by(slope, intercept, resid, samp_size) %>%   
+  expand(reps = 1:samp_size) %>%   
+  ungroup() %>%
+  crossing(sim= 1:100)
+
+#simulate age 
+seal_df <- seal_df %>%
+  mutate(age = runif(n(), 958, 8353))
+
+#predict length using y = mx + b  
+seal_df <- seal_df %>%
+  mutate(length = rnorm(n(), slope*age + intercept, resid))
+head(seal_df)
+
+#check to see if data looks ok; YAAAAAS *cough* 5th times a charm...
+ggplot(seal_df, aes(x = age, y = length)) +
+  geom_point()
+
+
+#moving on...
+
+```
 
 ```{r}
+#fit linear model
+colnames(seal_df)
 
-# 4. Sample Size
+#fit linear model and extract coefficients
+seal_df_fit <- seal_df %>%
+  group_by(slope, intercept, resid, samp_size, sim) %>%
+  nest() %>%
+  mutate(lin_mod = map(data, ~lm(length ~ age, data = .))) %>%
+   mutate(coefficients = map(lin_mod, ~tidy(.))) %>%   
+  unnest(coefficients) %>%   
+  ungroup()
+
+#add multiple alphas
+seal_df_fit <- seal_df_fit %>%
+  crossing(alpha = c(0.01, 0.05, 0.10))
+
+#calculate power for intercept
+  # power (1 - proportion of wrong p-values at a prespecified )
+    # i.e. 1-(# of p > alpha)/nsims
+
+power_int <- seal_df_fit %>%    
+  group_by(intercept, alpha)%>%     
+  summarise(power=1-sum(p.value>alpha)/n()) %>%    
+  ungroup()
+power_int
+
+#plot intercept vs power
+ggplot(power_int, aes(x = intercept, y = power, color = factor(alpha))) +
+  geom_point(size = 4) +
+  geom_line(size =2) +
+  theme_bw() +
+  scale_color_manual(values = beyonce_palette(129))
+
+#just trying another visualization...
+ggplot(power_int, aes(x = intercept, y = power, , color = factor(alpha))) +
+  geom_point(size = 3) +
+  geom_line(size = 1.5) +
+  facet_wrap(~alpha)
+
+#INTERCEPT NOT MUCH OF AN EFFECT ON POWER
 
 
-#linear model(lm())
-#F-test = anova(of linearmodel)
+#calculate power for resid
+power_resid <- seal_df_fit %>%    
+  group_by(resid, alpha)%>%     
+  summarise(power=1-sum(p.value>alpha)/n()) %>%    
+  ungroup()
+head(power_resid)
 
-#Power:
-#You know that for any set of parameters you are monkeying with, you'll need to: 1. Simulate a data set with those parameters. 2. Fit a model to that simulated dataset and extract a p-value. 3. Execute steps 1-2 some number of times. 4. From those p-values, calculate power (1 - proportion of wrong p-values at a prespecified ).
+#plot resid vs power
+ggplot(power_resid, aes(x = resid, y = power, color = factor(alpha))) +
+  geom_point(size = 4) +
+  geom_line(size =2) +
+  theme_bw() +
+  scale_color_manual(values = c("red", "darkblue", "purple"))
 
+#LARGE EFFECT ON POWER (increasing resid = decreasing power)
+
+#calculate power for samp_size
+power_samp_size <- seal_df_fit %>%    
+  group_by(samp_size, alpha)%>%     
+  summarise(power=1-sum(p.value>alpha)/n()) %>%    
+  ungroup()
+head(power_samp_size)
+
+#plot sample size vs power
+ggplot(power_samp_size, aes(x = samp_size, y = power, color = factor(alpha))) +
+  geom_point(size = 4) +
+  geom_line(size =2) +
+  theme_bw() +
+  scale_color_brewer(palette = "PuRd")
+
+#LARGE EFFECT ON POWER (increasing sample size increases power; also looks like it has a larger effect on the smallest alpha level (steeper slope for 0.01 than for 0.05 and 0.10))
 
 ```
-
-```{r, eval = FALSE}
-crossing multiple parameter units
-
-Crossing in beginning
-
-dataframe
-Slope	intercept	sigma		power
-
-
-Use filter to look at effects subset: where slope varied but where intercept and sigma equal the same values
-i.e.
-
-slope	intercept	sigma
-1        	1	     	1
-2       	1	    	1
-3         1       1
-OR use ggplot to play with facetwrap() or colors
-
-Do all at once (i.e. vary the 3 parameters) then break it up/look at it
-
-```
-
-#### Extra credit 1 - test whether the distribution of ages alters power: 3 points 
-
-####Extra Credit 2 Choose just one of the above elements to vary. Using likelihood to fit models, repeat your power analysis for a chi-square likelihood ratio test. You can use glm() , bbmle or some other means of fitting and obtaining a LRT at your discretion. 5 points. 
-
-
-
 
 ###4) Bayes Theorem 
 #### I've referenced the following figure a few times. I'd like you to demonstrate your understanding of Bayes Theorem by hand showing what the probability of the sun exploding is given the data. Assume that your prior probability that the sun explodes is p(Sun Explodes) = 0.0001. The rest of the information you need is in the cartoon!
@@ -222,6 +288,7 @@ qqline(res) #again, a little something weird at the ends
 hist(res) #normally distributed
 
 
+
 #model with Bayes
 quail_bayes <- brm(Culmen..mm. ~ Tarsus..mm.,
                      family = gaussian(link = "identity"),
@@ -249,18 +316,7 @@ qplot(quail_bayes_res$Estimate, quail_bayes_fit$Estimate) #no relationship
 ### 5.2 Three interpretations (10 points) 
 #### OK, now that we have fits, take a look! Do the coefficients and their associated measures of error in their estimation match? How would we interpret the results from these different analyses differently? Or would we? Note, confint works on lm objects as well. 
 
-*******************************************
-describe any differences in fits and if we should analyze differently
-
-#######The relationship from the three different analyses describes how Tarsus (leg) length predicts upper beak (Culmen) length. Although, we are trying to describe the same relationship we did so in three very different ways. 
-
-In our least squares method we took a frequentist approach where we had the goal of describing the probability of obtaining the Tarsus predicating beak size relationship. In this mindset we used our test statistics (Tarsus estimate = 0.37292677, p value = 3.23x10-273) to reject the null hypothesis. This would be interpreted as a fixed value and only Tarsus lengths at that size predicts the Culmen length.  
-
-In our second approach to describing this relationship we took a likelihoodist approach, in which, we looked at the probability of obtaining this relationship given our hypothesis. In this case we would use the generated test statistics similarly, to our first approach to look at the relationship, but this approach also allows us to evaluate the weight of evidence for different hypotheses and not just in rejection of our null. This likelihoodist framework allows for a little bit more freedom in our predictions and probabilities because of the model type framework we worked in. This allows for our description of our relationship to not be fixed upon one prediction.  
-
-Our Bayesian approach allows us to look at our relationship differently in that now we can assert probabilities to our relationship and it is not a fixed value of how the world of this bird morphology relationship works. In that Culmen length only predicts Tarsus given a specific length. In our Bayesian framework we now have the power, using the knowledge of how the world bird morphology works, that given a specific Culmen length we can give a specific probability with varying levels of freedom that the Tarsus length will be X.  
-################
-*************************************************
+The three different analyses resulted in the same (or very similar) estimates for coefficients and CI's. However, these results should be interpreted somewhat differently even though the outcome of those interpretations are similar (i.e. describing the relationship between Tarsus and culmen lengths). The least squares fit uses a null hypothesis (that there is no relationship between Tarsus length and culmen length) that we test with test statistics and a resulting p-value. The model fit using least squares is a frequentist approach, which means that there is theoretically one 'true' value of culmen length given a specific tarsus length. Likelihood also uses test statistics and a p-value, like the least-squares frequentist approach. However, likelihood allows for comparisons of hypotheses, not just to reject a null hypothesis. In turn, this doesn't give us one 'true' value like in least squares and can be less limiting in that respect. Fitting the data using Bayesian inference gives probabilities of possible values describing the relationship between variables, also not resulting in one 'true' value. This is a more flexible framework with which to analyze data and determine actual probabilities/predictions. 
 
 ```{r, message = FALSE, warning = FALSE}
 #least squares fit
@@ -269,7 +325,7 @@ Our Bayesian approach allows us to look at our relationship differently in that 
 tidy(anova(quail_mod))
 
 #t-tests of parameters
-tidy(summary(quail_mod))
+summary(quail_mod)
 
 #CIs
 confint(quail_mod)
@@ -279,7 +335,7 @@ quail_plot +
   stat_smooth(method=lm, formula=y~x,
               color = "red") 
 
-#***************************************************may need to do a different likelihood
+
 #likelihood fit
 #coefficients
 summary(quail_glm)
@@ -287,7 +343,7 @@ summary(quail_glm)
 #likelihood CIs
 confint(quail_glm)
 
-#plot with li ne
+#plot with line
 quail_plot + 
   geom_point() + 
   stat_smooth(method = "glm", 
@@ -330,69 +386,439 @@ quail_plot +
 ### 5.3 Everyday I'm Profilin' (10 points) 
 #### For your likelihood fit, are your profiles well behaved? For just the slope, use grid sampling to create a profile. You'll need to write functions for this, and use the results from your glm() fit to provide the reasonable bounds of what you should be profiling over (3SE should do). Is it well behaved? Plot the profile and give the 80% and 95% CI. Verify your results with profileModel . 
 
-```{r, eval = FALSE}
-#likelihood function
+Profiles look good, but had trouble with getting the CI's for slope. (I could get them for SD though...)
 
-likelihood_fun <- function(slope, intercept, resid_sd){
+```{r}
+#likelihood function
+likelihood_fun <- function(slope, intercept, sd){
   #data generating process
   culmen_fit <- intercept + slope * quail$Tarsus..mm.
   
   #likelihood
-  sum(dnorm(quail$Culmen..mm., culmen_fit, resid_sd, log=TRUE))
+  sum(dnorm(quail$Culmen..mm., culmen_fit, sd, log=TRUE))
+  
 }
 
 #eyeball parameters
 summary(quail_glm)
 
 #grid sampling
-grid_samp <- crossing(intercept = -0.10),
-                      slope = seq(0.25,0.45,.05),
-                      resid_sd = _______) %>%
+grid_samp <- crossing(intercept = seq(-0.05,0.05,0.01),
+                      slope = seq(0.1,0.6,0.01),
+                      sd = seq(1,2, 0.01)) %>%
   rowwise() %>%
-  mutate(loglike = likelihood_fun(slope, intercept, resid_sd)) %>%
+  mutate(loglike = likelihood_fun(slope, intercept, sd)) %>%
   ungroup()
 
+#Not working....not calculating likelihood
+head(grid_samp)
+
+#View(quail); NA's causing the problem?
+
+quail2 <- na.omit(quail)
+
+
+likelihood_fun <- function(slope, intercept, sd){
+  #data generating process
+  culmen_fit <- intercept + slope * quail2$Tarsus..mm.
+  
+  #likelihood
+  sum(dnorm(quail2$Culmen..mm., culmen_fit, sd, log=TRUE))
+  
+}
+
+#grid sampling second attempt
+grid_samp2 <- crossing(intercept = seq(-0.05,0.05,0.01),
+                      slope = seq(0.1,0.6,0.01),
+                      sd = seq(1,2, 0.01)) %>%
+  rowwise() %>%
+  mutate(loglike = likelihood_fun(slope, intercept, sd)) %>%
+  ungroup()
+
+#worked!!
+head(grid_samp2)
+
+
 #the ML estimates are
-grid_samp %>% filter(loglike == max(loglike))
+grid_samp2 %>% filter(loglike == max(loglike))
 
 
 #profiles
-plot(profile(quail_glm))
+quail_slope_profile <- grid_samp2 %>%   
+  group_by(slope) %>%   
+  filter(loglike == max(loglike)) %>%   
+  ungroup() 
 
+qplot(slope, loglike, data=quail_slope_profile, geom = "line")
+
+
+quail_sd_profile <- grid_samp2 %>%   
+  group_by(sd) %>%   
+  filter(loglike == max(loglike)) %>%   
+  ungroup() 
+
+qplot(sd, loglike, data=quail_sd_profile, geom = "line")
+
+
+quail_int_profile <- grid_samp2 %>%   
+  group_by(intercept) %>%   
+  filter(loglike == max(loglike)) %>%   
+  ungroup() 
+
+qplot(intercept, loglike, data=quail_int_profile, geom = "line")
+
+
+##From Likelihood Lab: "for each variable we want the profile of, we look at the MLE estimate at each value of the other parameter. So, group by the other parameter and filter out the MLE."
+
+# I tried both SD and slope, but only SD seems to give me CIs...
 
 #CIs
-confint(quail_glm)
+#95% SD CI = 1.18-1.30; slope is only returning 0.37; also tried for intercept (-0.05, 0.05; the range of the grid sampling...)
+qchisq(0.95,1)/2
+
+quail_sd_profile %>%   
+  filter(loglike > max(loglike) - 1.920729) %>% 
+  filter(row_number()==1 | row_number()==n())
+
+quail_slope_profile %>%   
+  filter(loglike > max(loglike) - 1.920729) %>% 
+  filter(row_number()==1 | row_number()==n())
+
+
+quail_int_profile %>%   
+  filter(loglike > max(loglike) - 1.920729) %>% 
+  filter(row_number()==1 | row_number()==n())
 
 
 
-#profileModel
+#80% SD CI = 1.20-1.27; slope is still only returning 0.37(??)
+#I dont understand why they aren't not working :(
+
+qchisq(0.80,1)/2
+
+quail_sd_profile %>%   
+  filter(loglike > max(loglike) - 0.8211872) %>% 
+  filter(row_number()==1 | row_number()==n())
+
+quail_slope_profile %>%   
+  filter(loglike > max(loglike) - 0.8211872) %>% 
+  filter(row_number()==1 | row_number()==n())
+
+quail_int_profile %>%   
+  filter(loglike > max(loglike) - 0.8211872) %>% 
+  filter(row_number()==1 | row_number()==n())
+
+
+#plot with CIs
+colnames(quail_slope_profile)
+
+
+#plotted it with a line through 0.37 since I couldn't get the CI's for somet reason
+ggplot(quail_slope_profile, aes(x = slope, y = loglike)) +
+  geom_line() +
+  geom_vline(xintercept=0.37, lty=2)
+
+
+#plotted SD since I could get those...
+#couldn't get a legend to show
+
+colnames(quail_sd_profile)
+
+ggplot(quail_sd_profile, aes(x = sd, y = loglike)) +
+  geom_line() +
+  geom_vline(xintercept=c(1.18, 1.30), lty=2, show.legend=TRUE) +
+  geom_vline(xintercept=c(1.20, 1.27), color = "red", show.legend=TRUE)
+
+
+#profileModel - looks like the max is right around 0.37 for slope and intercept plot looks similar to mine
 prof <- profileModel(quail_glm, 
                      objective = "ordinaryDeviance")
 plot(prof, print.grid.points = TRUE)
 
 
-#with CIs?
-prof <- profileModel(quail_glm,
+#with CIs - I didn't successfully get slope CI's...so hard to know if they match :( These look pretty though!
+prof2 <- profileModel(quail_glm,
                      objective = "ordinaryDeviance", 
                      quantile = qchisq(0.80, 0.95))
-plot(prof, print.grid.points = TRUE)
+plot(prof2, print.grid.points = TRUE)
 
 ```
 
-
 ### 5.4 The Power of the Prior (10 points) 
-#### This data set is pretty big. After excluding NAs in the variables we're interested in, it's over 766 lines of data! Now, a lot of data can overhwelm a strong prior. But only to a point. Show first that there is enough data here that a prior for the slope with an estimate of 0.4 and a sd of 0.01 is overwhelmed by the data by demonstrating that it produces similar results to our already fit flat prior. Second, see if a very small sample size (n = 10) would at least include 0.4 in it's 95% Credible Interval. Last, demonstrate at what sample size that 95% CL first begins to include 0.4 when we have a strong prior. How much data do we really need to overcome our prior belief? Note, it takes a long time to fit these models, so, try a strategy of spacing out the 3-4 sample sizes, and then zoom in on an interesting region. 
+#### This data set is pretty big. After excluding NAs in the variables we're interested in, it's over 766 lines of data! Now, a lot of data can overhwelm a strong prior. But only to a point. 
+
+#### Show first that there is enough data here that a prior for the slope with an estimate of 0.4 and a sd of 0.01 is overwhelmed by the data by demonstrating that it produces similar results to our already fit flat prior. 
+
+```{r}
+#current prior
+prior_summary(quail_bayes)
+
+quail_bayes_prior <- brm(Culmen..mm. ~ Tarsus..mm.,
+                           family = gaussian(link = "identity"),
+                           data = quail, 
+                           prior = prior(normal(0.4, 0.01), class = b),
+                           file = "quail_bayes_prior_0.4.Rds")
+
+prior_summary(quail_bayes_prior)
+
+#show results compared to original
+  #coefficients for intercept are slightly different but others are similar. CI's are different for intercept and slope (VERY wide for slope on new model)
+posterior_summary(quail_bayes)
+posterior_summary(quail_bayes_prior)
+
+
+#data overwhelming the prior of 0.4 [0.4 at very end of tail and range of values barely includes it]
+plot(quail_bayes_prior, par = "b_Tarsus..mm.")
+
+quail_bayes_prior_posterior <- posterior_samples(quail_bayes_prior,
+                                    add_chain = TRUE)
+
+min(quail_bayes_prior_posterior$b_Tarsus..mm.)
+max(quail_bayes_prior_posterior$b_Tarsus..mm.)
+
+#previous bayes analysis [slope values look very similar; mix-max does not include 0.40]
+plot(quail_bayes, par = "b_Tarsus..mm.")
+
+quail_bayes_posterior <- posterior_samples(quail_bayes,
+                                    add_chain = TRUE)
+
+min(quail_bayes_posterior$b_Tarsus..mm.)
+max(quail_bayes_posterior$b_Tarsus..mm.)
+
+
+#visualize (looks the same...)
+quail_chains_prior <- as.data.frame(quail_bayes_prior)
+
+quail_plot +
+  geom_abline(intercept=quail_chains_prior[,1], slope = quail_chains_prior[,2], alpha=0.1, color="lightgrey") +
+  geom_abline(intercept=fixef(quail_bayes_prior)[1], slope = fixef(quail_bayes_prior)[2], color="red") +
+  geom_point()
+
+```
+
+#### Second, see if a very small sample size (n = 10) would at least include 0.4 in it's 95% Credible Interval. 
+
+```{r, warning = FALSE}
+
+#random sample of quail (n = 10)
+quail_sub <- sample_n(quail, 10)
+
+#rerun bayes model
+quail_bayes_sub <- brm(Culmen..mm. ~ Tarsus..mm.,
+                           family = gaussian(link = "identity"),
+                           data = quail_sub, 
+                           prior = prior(normal(0.4, 0.01), class = b),
+                           file = "quail_bayes_sub.Rds")
+
+#this time slope is centered around the prior value of 0.4; this shows that the data did not overwhelm the prior this time
+
+plot(quail_bayes_sub, par = "b_Tarsus..mm.")
+
+#min-max = 0.367-0.434
+quail_bayes_sub_posterior <- posterior_samples(quail_bayes_sub,
+                                    add_chain = TRUE)
+min(quail_bayes_sub_posterior$b_Tarsus..mm.)
+max(quail_bayes_sub_posterior$b_Tarsus..mm.)
+
+#0.4 included in CI's
+posterior_summary(quail_bayes_sub)
+
+#visualize model [CI of fit MUCH wider]
+quail_chains_sub <- as.data.frame(quail_bayes_sub)
+
+quail_plot +
+  geom_abline(intercept=quail_chains_sub[,1], slope = quail_chains_sub[,2], alpha=0.1, color="lightgrey") +
+  geom_abline(intercept=fixef(quail_bayes_sub)[1], slope = fixef(quail_bayes_sub)[2], color="red") +
+  geom_point()
+
+```
+
+#### Last, demonstrate at what sample size that 95% CL first begins to include 0.4 when we have a strong prior. How much data do we really need to overcome our prior belief? Note, it takes a long time to fit these models, so, try a strategy of spacing out the 3-4 sample sizes, and then zoom in on an interesting region. 
+
+```{r}
+#sample size of 10 with prior = 0.4 INCLUDES 0.4
+#sample size of 766 with prior = 0.4 DOES NOT include 0.4
+#what sample size do we start to see 0.4 included?
+
+#random sample of quail (n = 200)
+quail_sub_200 <- sample_n(quail, 200)
+
+#rerun bayes model
+quail_bayes_sub_200 <- brm(Culmen..mm. ~ Tarsus..mm.,
+                           family = gaussian(link = "identity"),
+                           data = quail_sub_200, 
+                           prior = prior(normal(0.4, 0.01), class = b),
+                           file = "quail_bayes_sub_200.Rds")
+
+##includes 0.40
+plot(quail_bayes_sub_200, par = "b_Tarsus..mm.")
+posterior_summary(quail_bayes_sub_200)
+
+
+#random sample of quail (n = 400)
+quail_sub_400 <- sample_n(quail, 400)
+
+#rerun bayes model
+quail_bayes_sub_400 <- brm(Culmen..mm. ~ Tarsus..mm.,
+                           family = gaussian(link = "identity"),
+                           data = quail_sub_400, 
+                           prior = prior(normal(0.4, 0.01), class = b),
+                           file = "quail_bayes_sub_400.Rds")
+
+##includes 0.40, but barely
+plot(quail_bayes_sub_400, par = "b_Tarsus..mm.")
+posterior_summary(quail_bayes_sub_400)
 
 
 
+#random sample of quail (n = 500)
+quail_sub_500 <- sample_n(quail, 500)
+
+#rerun bayes model
+quail_bayes_sub_500 <- brm(Culmen..mm. ~ Tarsus..mm.,
+                           family = gaussian(link = "identity"),
+                           data = quail_sub_500, 
+                           prior = prior(normal(0.4, 0.01), class = b),
+                           file = "quail_bayes_sub_500.Rds")
+
+##Not included in CI
+plot(quail_bayes_sub_500, par = "b_Tarsus..mm.")
+posterior_summary(quail_bayes_sub_500)
+
+
+
+#random sample of quail (n = 450)
+quail_sub_450 <- sample_n(quail, 450)
+
+#rerun bayes model
+quail_bayes_sub_450 <- brm(Culmen..mm. ~ Tarsus..mm.,
+                           family = gaussian(link = "identity"),
+                           data = quail_sub_450, 
+                           prior = prior(normal(0.4, 0.01), class = b),
+                           file = "quail_bayes_sub_450.Rds")
+
+##includes 0.40
+plot(quail_bayes_sub_450, par = "b_Tarsus..mm.")
+posterior_summary(quail_bayes_sub_450)
+
+#Looks like somwehere between 450 and 500 samples is where 0.40 would start to show up in CI's. Therefore, n = 500 is roughly the number of samples we would need to overwhelm the prior.
+```
 
 
 ### 6. Extra Credit Make an election forecast
 #### 1 point for the correct winner. 5 points for correctly predicting the popular vote and being within 10% (3% just for trying!). 5 points for predicting the electoral college and geting no more than 5 states wrong (3 points just for trying). 5 points for predicting the senate races getting no more than 5 states wrong (3 points just for trying). 1 extra point for each vote percentage within your 80% Confidence/Credible Interval. Ditto for the house races
 
-```{r}
+Did what I could with what time I had left! From what I was able to do (if correct) it looks like the race for the house was too close to reliably call! There is a large overlap in confidence intervals. 
+
+```{r, message = FALSE, warning = FALSE}
+library(pollstR)
+library(reshape2)
+
+#used data from pollstR: An R Client for the HuffPost Pollster API
+
+#house race data
+slug <- "2018-national-house-race"
+polls <- pollster_charts_polls(slug)[["content"]]
+str(polls)
 
 
+#generate weights & multiply each poll by weight
+polls <- polls %>%
+  as.data.frame() %>%
+  mutate(pollWeights = polls$observations/sum(polls$observations, na.rm = T))
+
+polls <- polls %>%
+  mutate(DemocratWeighted = polls$Democrat * polls$pollWeights,
+         RepublicanWeighted = polls$Republican * polls$pollWeights,
+         OtherWeighted = polls$Other * polls$pollWeights,
+         UndecidedWeighted = polls$Undecided * polls$pollWeights)
+
+colnames(polls)
+
+#sum for weighted average
+sumDems <- sum(polls$DemocratWeighted, na.rm = T)
+sumReps <- sum(polls$RepublicanWeighted, na.rm = T)
+sumOther <- sum(polls$OtherWeighted, na.rm = T)
+sumUndec <- sum(polls$UndecidedWeighted, na.rm = T)
+
+#make sure equals ~100
+sum(sumDems, sumReps, sumOther, sumUndec)
+
+#weighted variance
+Dem_Var <-  sqrt(sum(polls$pollWeights * (polls$Democrat-sumDems)^2, na.rm = T))
+Rep_Var <-  sqrt(sum(polls$pollWeights * (polls$Republican-sumReps)^2, na.rm = T))
+Undec_Var <-  sqrt(sum(polls$pollWeights * (polls$Undecided-sumUndec)^2, na.rm = T))
+Other_Var <-  sqrt(sum(polls$pollWeights * (polls$Other-sumOther)^2, na.rm = T))
+
+#probability density functions
+polls <- polls %>%
+  mutate(Dem_pdf = dnorm(polls$Democrat,sumDems, Dem_Var),
+         Rep_pdf = dnorm(polls$Republican,sumReps, Rep_Var),
+         Other_pdf = dnorm(polls$Other,sumOther, Other_Var),
+         Undec_pdf = dnorm(polls$Undecided,sumUndec, Undec_Var))
+
+colnames(polls)
+
+#plot densities
+ggplot(polls, aes(x = Democrat, y = Dem_pdf)) +
+  geom_line()
+#normal
+
+ggplot(polls, aes(x = Republican, y = Rep_pdf)) +
+  geom_line()
+#normal
+
+ggplot(polls, aes(x = Other, y = Other_pdf)) +
+  geom_line()
+#little funky (lack of data?); gamma distribution
+
+ggplot(polls, aes(x = Undecided, y = Undec_pdf)) +
+  geom_line()
+#normal
+
+
+#CIs
+#Democrats
+Dem_CI_low <- sumDems - (2 * Dem_Var)
+Dem_CI_high <-sumDems + (2 * Dem_Var)
+Dem_CI_low; Dem_CI_high
+
+
+#Republicans
+Rep_CI_low <- sumReps - (2 * Rep_Var)
+Rep_CI_high <- sumReps + (2 * Rep_Var)
+Rep_CI_low; Rep_CI_high
+
+#Democrats: 35.78359 - 51.00729
+#Republicans: 30.29583  - 43.69387
+#so much overlap!!!
+
+
+#write.csv(polls,'polls.csv')
+#having trouble manipulating dataframe into usable columns for plotting variables together
+#made my own spreadsheet to use for plots
+
+polls_2 <- read.csv("polls_tweaked.csv")
+head(polls_2)
+
+#boxplots (a lot of overlap)
+ggplot(polls_2, aes(x = Party, y = Weighted)) +
+  geom_boxplot()
+
+#probability density function overlap
+ggplot(polls_2, aes(pdf, fill=Party)) + 
+  geom_density(alpha=.4, color=NA)
+
+#weighted polls overlap
+ggplot(polls_2, aes(Weighted, fill=Party)) + 
+  geom_density(alpha=.4, color=NA)
+
+#just thought these were interesting
+ggplot(polls_2, aes(Percent, fill=Party)) + 
+  geom_histogram(alpha=.4, color=NA)
+
+ggplot(polls_2, aes(Percent, fill=Party)) + 
+  geom_density(alpha=.4, color=NA)
 
 ```
 
