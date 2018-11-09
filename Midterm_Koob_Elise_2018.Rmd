@@ -167,7 +167,7 @@ power_int <- seal_df_fit %>%
   ungroup()
 power_int
 
-#plot intercept vs power
+#plot intercept vs power  
 ggplot(power_int, aes(x = intercept, y = power, color = factor(alpha))) +
   geom_point(size = 4) +
   geom_line(size =2) +
